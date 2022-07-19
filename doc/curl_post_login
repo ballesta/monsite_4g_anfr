@@ -1,0 +1,10 @@
+curl -X POST \
+    -H 'Content-Type: application/json' \
+    -d '{"login": "import_cartoradio@ballesta.fr", "pwd": "//11031049"}' \
+    https://cartoradio.fr/api/v1/utilisateurs/signin
+
+curl -X POST \
+    https://cartoradio.fr/api/v1/utilisateurs/signin
+
+
+curl -v -X POST -H 'Content-Type: application/json' -H 'login:import_cartoradio@ballesta.fr' -H 'pwd://11031049' https://cartoradio.fr/api/v1/utilisateurs/signin

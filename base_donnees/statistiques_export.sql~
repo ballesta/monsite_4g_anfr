@@ -1,0 +1,3 @@
+select count(*) as 'Nombre départements exportés' from departements where dp_date_demande_export is not null;
+select count(*) as 'Nombre supports exportés' from supports;
+select count(*) as 'Nombre antennes exportées' from antennes;

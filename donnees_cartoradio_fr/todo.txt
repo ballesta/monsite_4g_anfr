@@ -1,0 +1,54 @@
+Créer script sql base anfr
+     Departements remplis et initialisés à null
+     Antennes Vide
+     Supports Vide
+     Log Vide
+     ==>OK
+1&1 base
+    Créer base monsite4g_anfr
+    Initialiser avec monsite4g_anfr.sql
+    ==> OK
+1&1 site anfr
+    Vérifier sous domaine anfr.monsite4g
+    Transférer
+
+
+Créer script init à lancer en début de session (20h tous les jours)
+    Raz dates importation dans département
+
+
+DECLARE @SQL varchar(40000)='';
+SELECT @SQL =
+@SQL + 'ALTER TABLE ' + s.name+'.'+t.name + ' DROP CONSTRAINT [' + RTRIM(f.name) +'];' + CHAR(13)
+FROM information_schema.tables  t
+INNER JOIN sys.foreign_keys f ON f.parent_object_id = t.object_id
+INNER JOIN sys.schemas     s ON s.schema_id = f.schema_id;
+EXEC (@SQL);
+
+PRINT @SQL
+SET foreign_key_checks = 0; DROP TABLE antennes_site                ;
+SET foreign_key_checks = 0; DROP TABLE compte                       ;
+SET foreign_key_checks = 0; DROP TABLE compte_00                    ;
+SET foreign_key_checks = 0; DROP TABLE exploitants                  ;
+SET foreign_key_checks = 0; DROP TABLE habitat                      ;
+SET foreign_key_checks = 0; DROP TABLE habitat_00                   ;
+SET foreign_key_checks = 0; DROP TABLE horizon_temporel             ;
+SET foreign_key_checks = 0; DROP TABLE import_departements          ;
+SET foreign_key_checks = 0; DROP TABLE imports                      ;
+SET foreign_key_checks = 0; DROP TABLE messages                     ;
+SET foreign_key_checks = 0; DROP TABLE nouveaux_supports            ;
+SET foreign_key_checks = 0; DROP TABLE operateur                    ;
+SET foreign_key_checks = 0; DROP TABLE pays                         ;
+SET foreign_key_checks = 0; DROP TABLE site                         ;
+SET foreign_key_checks = 0; DROP TABLE sites                        ;
+SET foreign_key_checks = 0; DROP TABLE sites_antennes               ;
+SET foreign_key_checks = 0; DROP TABLE sites_exploitants_antennes   ;
+SET foreign_key_checks = 0; DROP TABLE test_import                  ;
+SET foreign_key_checks = 0; DROP TABLE type_compte                  ;
+
+CONSTRAINT `reference_support`
+CONSTRAINT `reference_support`
+CONSTRAINT `habitat_antennes_site`
+CONSTRAINT `site_antennes_site`
+CONSTRAINT `pays_habitats`
+CONSTRAINT `compte_sites`

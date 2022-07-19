@@ -1,0 +1,4 @@
+cron
+import_cartoradio
+cron:$1$OoPbKmvu$GeFWYM0wiDH3tq.gWGW5B0
+anfr.monsite4g.fr/donnees_cartoradio_fr/experimentation/authentification/cron_job.php

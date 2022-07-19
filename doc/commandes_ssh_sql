@@ -1,0 +1,6 @@
+
+SSH BALLESTA.FR
+	ssh u46531268@home218625728.1and1-data.host
+	/*-IBM[1620,360/40,1130];XDS940];DIgital-VAX-*/
+
+mysql -h db690937562.db.1and1.com -u dbo690937562 -p//monsite4g_v1// db690937562 < bd.zip

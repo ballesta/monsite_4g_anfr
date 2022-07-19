@@ -1,0 +1,22 @@
+-- Supprime les tables dans monsite4g_anfr
+------------------------------------------
+SET foreign_key_checks = 0; DROP TABLE antennes_site                ;
+SET foreign_key_checks = 0; DROP TABLE compte                       ;
+SET foreign_key_checks = 0; DROP TABLE compte_00                    ;
+SET foreign_key_checks = 0; DROP TABLE exploitants                  ;
+SET foreign_key_checks = 0; DROP TABLE habitat                      ;
+SET foreign_key_checks = 0; DROP TABLE habitat_00                   ;
+SET foreign_key_checks = 0; DROP TABLE horizon_temporel             ;
+SET foreign_key_checks = 0; DROP TABLE import_departements          ;
+SET foreign_key_checks = 0; DROP TABLE imports                      ;
+SET foreign_key_checks = 0; DROP TABLE messages                     ;
+SET foreign_key_checks = 0; DROP TABLE nouveaux_supports            ;
+SET foreign_key_checks = 0; DROP TABLE operateur                    ;
+SET foreign_key_checks = 0; DROP TABLE pays                         ;
+SET foreign_key_checks = 0; DROP TABLE site                         ;
+SET foreign_key_checks = 0; DROP TABLE sites                        ;
+SET foreign_key_checks = 0; DROP TABLE sites_antennes               ;
+SET foreign_key_checks = 0; DROP TABLE sites_exploitants_antennes   ;
+SET foreign_key_checks = 0; DROP TABLE test_import                  ;
+SET foreign_key_checks = 0; DROP TABLE type_compte                  ;
+

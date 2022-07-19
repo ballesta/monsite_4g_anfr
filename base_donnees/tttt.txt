@@ -1,0 +1,16 @@
+Base de données
+    db726712341
+Description
+    monsite4g_anfr
+Nom d'hôte
+    db726712341.db.1and1.com
+Port
+    3306
+Nom d'utilisateur
+    dbo726712341
+Type et version
+    MySQL 5.5
+Mot de passe
+    //RADIOradio//anfr
+
+http:anfr.monsite4g.fr/donnees_cartoradio_fr/cas/tache_cron/cron_export_import_departement.php

@@ -1,0 +1,7 @@
+AuthName "Monsite4G Import Cartoradio"
+
+AuthType Basic
+
+AuthUserFile "/homepages/11/d218625728/htdocs/monsite4g_anfr/donnees_cartoradio_fr/experimentation/authentification/.htpasswd"
+
+Require valid-user

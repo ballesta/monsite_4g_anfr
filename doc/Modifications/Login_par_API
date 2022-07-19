@@ -1,0 +1,24 @@
+# Monsite 4G ANFR
+- BB
+- 2022 07 4
+## Anomalie: Import des données De Cartoiradio HS
+## Analyse
+### Problème 1: connection à notre compte Cartiradio.fr
+Compte utilisé pour importer les supports et antennes
+- Changement de l'appel au formulaire de connection
+	- Avant: 
+		- formulaire standard en post, identifiants passés par le post
+		- URL de login
+	- Maintenant:
+		- Mise en oeuvre d'une API
+		- Passage des parametres de connection par le header de la requete HTTP
+		- N'apporte rien fonctionnelement, mais beaucoup plus à la mode!
+
+### Problème 1: lecture des mails en procenance de Cartoradio.fr
+- Changements dans l'appel du serveur de messagerie de 1&1 
+	- Changement de port
+	- ignorer certificats
+	- Voir: https://stackoverflow.com/questions/35104615/why-doesnt-phps-imap-open-like-ssl
+	
+	
+ 

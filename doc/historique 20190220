@@ -1,0 +1,20 @@
+
+SELECT count(*) 
+FROM supports 
+WHERE departement = 78
+
+SELECT count(*) 
+FROM antennes a JOIN  `supports` s 
+ON a.support_id    = s.support_id
+WHERE s.departement = 78
+
+db690937562
+Base actuelle departement 78
+=> 1.085 supports
+=>48.382 antennes
+
+db726712341 
+Nouvelle seulement departement 78
+=> 1.097 supports
+=>51.153 antennes
+

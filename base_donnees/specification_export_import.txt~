@@ -1,0 +1,35 @@
+A 20:00 
+    Init de la liste des département à importer de Cartoradio.fr
+    Raz des tables antennes et supports de la base monsite4g_anfr
+    Demander l'importation du 1er département    
+    etat = export_departements 
+Répéter de 20:05 à 07:55 (J+1) par incrément de 05 minutes (12*12 = 144 fois)
+    Suivant état courant
+    cas export_departements 
+        faire import_departement
+        si il reste des département à importer
+            Demander l'export du département suivant
+        sinon
+            etat = verification
+    etat verification
+        si départements demandés mais non importés
+            signaler problème
+            etat = terminé
+        sinon
+            etat = transfert vers monsite4g
+    cas transfert vers monsite4g    
+        Dump des antennes et supports vers fichier (1)
+        Sauvegarde des antennes et supports de monsite4g par sécurité
+        Vider les antennes et supports de monsite4g
+        Charger les antennes et supports avec fichier (1) dans monsite4g    
+        etat = terminé
+    cas terminé
+        Ne rien faire
+        Derniers passage du cron après le traitement de tous les départements
+
+fonction import_departement 
+    Lire les mails de réponse de Cartoradio
+    Télécharger le fichier Zip à l'aide du lien contenu dans le mail
+    Décompresser vers csv
+    Charger les fichiers ccsv dans la base monsite4g_anfr
+    Supprimer le mail reçu de Cartoradio.fr
