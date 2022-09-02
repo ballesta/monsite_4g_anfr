@@ -94,6 +94,8 @@ import_donnees_cartoradio
 function import_donnees_cartoradio()
 {
     header('Content-Type: text/html; charset=utf-8');
+    
+    execute(connexion_cartoradio(), "connexion_cartoradio");
 
     traite_mail();
 
@@ -114,11 +116,13 @@ function traite_mail()
 {
     global $anomalie;
     $anomalie->titre("Traite mails") ;
-    execute(connexion_cartoradio(), "connexion_cartoradio");
+    echo "traite_mail()==><br>";
+    //--execute(connexion_cartoradio(), "connexion_cartoradio");
     $emails = New Email_reader();
     $nombre_mails_traites = 0;
     // Pour tous les messages de la boite mail
-    if (count($emails->inbox ) > 0) {
+    $messages_a_traiter = count($emails->inbox);
+    if ($messages_a_traiter > 0) {
         foreach ($emails->inbox as $mail) {
             $h = $mail['header'];
             $emetteur = trim($h->fromaddress);
@@ -128,18 +132,18 @@ function traite_mail()
                 $b = $mail['body'];
                 // Decode Type Mime
                 $texte = quoted_printable_decode($b);
-                echo $texte;
+                trace ("Texte mail: $texte");
 
                 // Début de l'url du lien vers le fichier à télécharger
                 $debut = 'https://www.cartoradio.fr/#/telechargement';
                 $p = strpos($texte, $debut);
-                // Présence du lien?
+                // Présence du lien de téléchargement?
                 if ($p > 0) {
                     // Présence du lien de téléchargement dans le corps du mail.
                     // Extraire la clef identifiant le téléchargement sur 32 caractères.
                     $id = substr($texte,
-                          $p + strlen($debut),
-                          32);
+                                 $p + strlen($debut),
+                                 32);
                     // Ajouter le lien de téléchargement
                     $lien_import_fichier_zip = $debut . $id;
                     echo 'Fichier:', $lien_import_fichier_zip, '<br>';
@@ -169,43 +173,59 @@ function traite_mail()
     else
     {
         // Pas de mails à traiter
-        echo "Pas de mails à traiter!<br>";
+        trace("Pas de mails à traiter!: $messages_a_traiter");
     }
-    echo "nombre_mails_traites:	$nombre_mails_traites <br>";
+    trace("nombre_mails_traites: $nombre_mails_traites");
 }
 
+function trace($texte)
+{
+    echo "Trace: $texte <br>";
+}
+
+/*
 // Connexion au site "www.cartoradio.fr"
 // La connexion est mémorisée dans le navigateur (cookies).
 function connexion_cartoradio()
 {
-    echo "Connexion à cartoradio v01<br><br>";
+    trace("Connexion à cartoradio v01");
 
     // Create temp file to store cookies
     $ckfile = tempnam ("/tmp", "CURL_Cookie_");
 
-    // L'initialisation du connecteur curl en php se fait en utilisant la fonction curl_init().
+    // L'initialisation du connecteur curl en php se fait 
+    // en utilisant la fonction curl_init().
     // cette fonction retourne un connecteur curl.
     $url = 'https://cartoradio.fr/api/v1/utilisateurs/signin';
     $curl = curl_init($url);
-
+    trace("curl_init($url)");
     // Prépare les données à envoyer pour la connection.
     // Compte sur Cartoradio
-    $data = [
+    $identifiant_compte = [
         'login' => 'import_cartoradio@ballesta.fr',
         'pwd'   => '//11031049'
     ];
-    $data_json = json_encode($data);
+    $identifiant_compte_json = json_encode($identifiant_compte);
+    trace("Identifiant connexion: $identifiant_compte_json");
 
     // Précise les Options de connection
 
-    // CURLOPT_POST : la requête doit utiliser le protocole POST pour sa résolution.
-    execute(curl_setopt($curl, CURLOPT_POST, true), 'POST');
+    // CURLOPT_POST : la requête doit utiliser le protocole POST 
+    // pour sa résolution.
+    execute(curl_setopt($curl, 
+                        CURLOPT_POST, 
+                        true), 
+            'POST');
 
-    // CURLOPT_CUSTOMREQUEST : pour forcer le format de la commande HTTP POST
-    //execute(curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'POST'), 'CUSTOMREQUEST');
+    // CURLOPT_CUSTOMREQUEST : pour forcer le format 
+    // de la commande HTTP POST
+    //execute(curl_setopt($curl, 
+    //                    CURLOPT_CUSTOMREQUEST, 
+    //                    'POST'), 
+    //'CUSTOMREQUEST');
 
-    // CURLOPT_HTTPHEADER : tableau non associatif pour modifier des paramètres
-    // du header envoyé par la requête.
+    // CURLOPT_HTTPHEADER : tableau non associatif pour modifier 
+    // des paramètres du header envoyé par la requête.
     execute(curl_setopt($curl,
         CURLOPT_HTTPHEADER,
         [
@@ -226,7 +246,9 @@ function connexion_cartoradio()
             $ckfile),
         'COOKIE');
 
-    // CURLOPT_RETURNTRANSFER : si nous voulons ou non récupérer le contenu de la requête appelée
+    // CURLOPT_RETURNTRANSFER : 
+    // si nous voulons ou non récupérer le contenu 
+    // de la requête appelée
     execute(
         curl_setopt(
             $curl,
@@ -240,7 +262,7 @@ function connexion_cartoradio()
 
     return true;
 }
-
+*/
 // Importe le fichier dont le lien a été reçu par mail.
 function importe_fichier($lien_import_fichier_zip)
 {
@@ -320,9 +342,13 @@ function demande_export_prochain_departement()
     //print_r($departement_a_importer); die();
     if ($departement_a_importer !== null)
     {
-        echo "<hr>Département: ", $departement_a_importer['dp_numero'], " id: ", $departement_a_importer['dp_id'], "<hr>";
+        echo "<hr>";
+        echo "Département: ", $departement_a_importer['dp_numero'], 
+             " id: ", $departement_a_importer['dp_id'];
+        echo "<br>";
         $dp_id = $departement_a_importer['dp_id'];
         $e = new Exporte_departements();
+        trace("Département à exporter: $dp_id")
         $e->exporte_departement($dp_id);
         $e->enregistre_demande_export_departement($dp_id);
     }

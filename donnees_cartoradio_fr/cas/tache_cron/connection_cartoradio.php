@@ -1,7 +1,7 @@
 <?php
 
 $url = "https://www.cartoradio.fr/api/v1/utilisateurs/signin";
-echo "Connection $url";
+echo "Connectionau serveur:  $url";
 $data = [
     'Host'  => 'www.cartoradio.fr',
     'login' => 'import_cartoradio@ballesta.fr',

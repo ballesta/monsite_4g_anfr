@@ -123,7 +123,7 @@ class Exporte_departements
 	// La connexion est mémorisée dans le navigateur (cookies).
 	function connexion_cartoradio()
 	{
-	    echo "Connexion à cartoradio<br><br>";
+	    echo "Connexion à cartoradio<br>";
         // Create temp file to store cookies
         $this->ckfile = tempnam ("/tmp", "CURLCOOKIE");
 
@@ -150,6 +150,7 @@ class Exporte_departements
             }
 			else
             {
+				die("Echec Connexion Cartoradio");
                 $connexion = false;
             }
 		}
@@ -187,8 +188,8 @@ class Exporte_departements
 		// mais un identifiant proche correspondant à l'attribut dp_id
 		// de la table "departement"
 		$query=
-			'departement=' .
-			$departement_id.'&'      .
+			'departement=' . $departement_id . '&'.
+			/*
 			'categories[]=TEL&'      .
 			'operateurs[]=6&'        .
 			'operateurs[]=23&'       .
@@ -205,8 +206,10 @@ class Exporte_departements
 			'anciennete=720&'        .
 			'valeurLimiteMin=0&'     .
 			'valeurLimiteMax=87&'    .
+			*/
 			'idUtilisateur=10104'    ;
 		    // todo Récupérer idUtilisateur de la connexion ?
+            echo "Query: $query <br>"; 
 
 		// Page à appeler
 		curl_setopt($ch,
@@ -214,7 +217,7 @@ class Exporte_departements
 					$url . '?' . $query);
 		// Cookies pour preuve de connexion (les 2 sont necessaires)
         curl_setopt($ch, CURLOPT_COOKIEJAR, $this->ckfile);
-        curl_setopt ($ch, CURLOPT_COOKIEFILE, $this->ckfile);
+        curl_setopt($ch, CURLOPT_COOKIEFILE, $this->ckfile);
         // Simule un envoi de formulaire par POST
 		//curl_setopt($ch, CURLOPT_POST, true);
 		// Valeurs envoyées à la page (id du département)
@@ -232,7 +235,7 @@ class Exporte_departements
 		{
 			// Réponse à la demande d'export
 			$obj = json_decode($response);
-			print_r($response); echo '<br>';
+			print_r($response); echo '--><br>';
 			// Succes de la demande d'export?
 			if ($obj->success)
 			{
@@ -245,7 +248,6 @@ class Exporte_departements
 			}
 			else
 			{
-
 				echo "*** Echec de la demande d'export ***<br>";
 				$export = false;
 			}
@@ -253,7 +255,7 @@ class Exporte_departements
 		else
 		{
 			// Aucune réponse
-			echo "***Erreur demande export: ", curl_error($ch), ' ***<br>';
+			echo "*** Erreur demande export: ", curl_error($ch), ' ***<br>';
 			$export = false;
 		}
 		echo '<hr>';
