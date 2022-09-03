@@ -15,8 +15,12 @@ class Connection_cartoradio
     {
         echo "Connexion à cartoradio v01<br>";
 
-        self::$ckfile = tempnam("/tmp", "CURL_Cookie_");
-
+        self::$ckfile = tempnam(
+            "cookies",
+            "CURL_Cookie_"
+        );
+        echo 'Fichier des Cookies: ', self::$ckfile, '<br>';
+        //die();
         // L'initialisation du connecteur curl en php se fait 
         // en utilisant la fonction curl_init().
         // cette fonction retourne un connecteur curl.
@@ -28,15 +32,15 @@ class Connection_cartoradio
         // Précise les Options avant de tenter la connection
 
         // Utiliser le protocole POST 
-        curl_setopt(
-            self::$curl,
+        self::option(
+            'CURLOPT_POST',
             CURLOPT_POST,
             true
         );
 
         // Paramètres du header envoyés par la requête de connection.
-        curl_setopt(
-            self::$curl,
+        self::option(
+            'CURLOPT_HTTPHEADER',
             CURLOPT_HTTPHEADER,
             [
                 'Cache-Control: no-cache',
@@ -48,45 +52,102 @@ class Connection_cartoradio
             ]
         );
 
+        echo 'COOKIE: ', self::$ckfile, '<br>';
         // Cookie pour mémoriser la connection    
-        curl_setopt(
-            self::$curl,
+        self::option(
+            'CURLOPT_COOKIEJAR',
             CURLOPT_COOKIEJAR,
             self::$ckfile
         );
 
         // Pour récupérer le contenu de la requête
-        curl_setopt(
-            self::$curl,
+        self::option(
+            'CURLOPT_RETURNTRANSFER',
             CURLOPT_RETURNTRANSFER,
             true
         );
 
         // Connection à Cartoradio (enfin!)
-        $reponse_json = curl_exec(self::$curl);
+        $reponse_json = self::execute();
 
         // Transforme la réponse Json vers un tableau associatif
         $reponse = json_decode($reponse_json, true);
         if (
-            is_array($reponse) &&
+            is_array($reponse)
+            &&
             array_key_exists('id', $reponse)
         ) {
             // Mémorise id
             self::$id_connection = $reponse['id'];
             echo 'self::$id_connection: ', self::$id_connection, "<br>";
+            echo "*** Connection 'cartoradio.fr' OK ***<br>";
             return true;
         } else {
             echo "*** Erreur de connection ***: $reponse_json <br>";
             return false;
         }
     }
+
+    public static function option($nom, $code, $valeur)
+    {
+        echo "Option Curl: $nom=$valeur<br>";
+        curl_setopt(
+            self::$curl,
+            $code,
+            $valeur
+        );
+    }
+
+    public static function execute()
+    {
+        // Cookies pour preuve de connexion (les 2 sont necessaires)
+        self::option(
+            'CURLOPT_COOKIEJAR',
+            CURLOPT_COOKIEJAR,
+            self::$ckfile
+        );
+
+        // Fichier dans lequel cURL va lire les cookies
+        self::option(
+            'CURLOPT_COOKIEFILE',
+            CURLOPT_COOKIEFILE,
+            self::$ckfile
+        );
+
+        // Renvoie le résultat au programme
+        self::option(
+            'CURLOPT_RETURNTRANSFER',
+            CURLOPT_RETURNTRANSFER,
+            true
+        );
+        self::option(
+            'CURLOPT_VERBOSE',
+            CURLOPT_VERBOSE,
+            true
+        );
+
+        echo 'Execute Curl<br>';
+        $resultat = curl_exec(self::$curl);
+        if ($resultat === false) {
+            echo 'Erreur Curl: ', curl_error(self::$curl), '<br>';
+            die('Fin');
+        }
+        return $resultat;
+    }
+
+    public static function ferme()
+    {
+        curl_close(self::$curl);
+        //unset(self::$curl);
+    }
 } // class
 
-
-/* 
 // Test
-if (Cartoradio::connection())
+if (Connection_cartoradio::connection()) {
     echo "<hr>Connecté<hr>";
-else
+    $url = 'https://www.cartoradio.fr/api/v1/export';
+    $query =
+        'departement=' . '79'
+        . '&' . 'idUtilisateur=10104';
+} else
     echo "<hr>Non Connecté<hr>";
-*/
