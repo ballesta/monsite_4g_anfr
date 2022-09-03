@@ -69,9 +69,13 @@ require_once '../../composants/CurlDownloader.php';
 require_once '../../composants/Trace_import_departements.php';
 require_once '../../composants/Anomalie.class.php';
 require_once '../../composants/Csv_reader.php';
+require_once '../../composants/Connection_cartoradio.class.php';
 require_once 'execute.php';
 
 $anomalie = new Anomalie();
+
+// Connection rémanente à 'cartoradio.fr'
+Connection_cartoradio::connection();
 
 import_donnees_cartoradio();
 
@@ -94,8 +98,6 @@ import_donnees_cartoradio
 function import_donnees_cartoradio()
 {
     header('Content-Type: text/html; charset=utf-8');
-    
-    execute(connexion_cartoradio(), "connexion_cartoradio");
 
     traite_mail();
 
@@ -115,10 +117,10 @@ function import_donnees_cartoradio()
 function traite_mail()
 {
     global $anomalie;
-    $anomalie->titre("Traite mails") ;
+    $anomalie->titre("Traite mails");
     echo "traite_mail()==><br>";
     //--execute(connexion_cartoradio(), "connexion_cartoradio");
-    $emails = New Email_reader();
+    $emails = new Email_reader();
     $nombre_mails_traites = 0;
     // Pour tous les messages de la boite mail
     $messages_a_traiter = count($emails->inbox);
@@ -132,7 +134,7 @@ function traite_mail()
                 $b = $mail['body'];
                 // Decode Type Mime
                 $texte = quoted_printable_decode($b);
-                trace ("Texte mail: $texte");
+                trace("Texte mail: $texte");
 
                 // Début de l'url du lien vers le fichier à télécharger
                 $debut = 'https://www.cartoradio.fr/#/telechargement';
@@ -141,27 +143,27 @@ function traite_mail()
                 if ($p > 0) {
                     // Présence du lien de téléchargement dans le corps du mail.
                     // Extraire la clef identifiant le téléchargement sur 32 caractères.
-                    $id = substr($texte,
-                                 $p + strlen($debut),
-                                 32);
+                    $id = substr(
+                        $texte,
+                        $p + strlen($debut),
+                        32
+                    );
                     // Ajouter le lien de téléchargement
                     $lien_import_fichier_zip = $debut . $id;
                     echo 'Fichier:', $lien_import_fichier_zip, '<br>';
                     Trace_import_departements::memorise_attribut('dp_date_demande_export', date("Y-m-d H:i:s"));
 
                     $resultat_import = importe_fichier($lien_import_fichier_zip);
-                    if ($resultat_import){
+                    if ($resultat_import) {
                         Trace_import_departements::maj_attributs();
                         flush();
                     }
                     $nombre_mails_traites++;
-                }
-                else {
+                } else {
                     echo "Le lien de téléchargement n'est pas présent: ne pas traiter ce message", '<br>';
                 }
-            }
-            else {
-                echo "Mail hors sujet (sujet = '$sujet', emetteur =  '$emetteur' inconnus): ne pas traiter ce message",'<br>';
+            } else {
+                echo "Mail hors sujet (sujet = '$sujet', emetteur =  '$emetteur' inconnus): ne pas traiter ce message", '<br>';
             }
             $index_email = $mail['index'];
             $emails->delete_mail($index_email);
@@ -169,9 +171,7 @@ function traite_mail()
                 break;
             }
         } // foreach mail
-    }
-    else
-    {
+    } else {
         // Pas de mails à traiter
         trace("Pas de mails à traiter!: $messages_a_traiter");
     }
@@ -183,123 +183,44 @@ function trace($texte)
     echo "Trace: $texte <br>";
 }
 
-/*
-// Connexion au site "www.cartoradio.fr"
-// La connexion est mémorisée dans le navigateur (cookies).
-function connexion_cartoradio()
-{
-    trace("Connexion à cartoradio v01");
-
-    // Create temp file to store cookies
-    $ckfile = tempnam ("/tmp", "CURL_Cookie_");
-
-    // L'initialisation du connecteur curl en php se fait 
-    // en utilisant la fonction curl_init().
-    // cette fonction retourne un connecteur curl.
-    $url = 'https://cartoradio.fr/api/v1/utilisateurs/signin';
-    $curl = curl_init($url);
-    trace("curl_init($url)");
-    // Prépare les données à envoyer pour la connection.
-    // Compte sur Cartoradio
-    $identifiant_compte = [
-        'login' => 'import_cartoradio@ballesta.fr',
-        'pwd'   => '//11031049'
-    ];
-    $identifiant_compte_json = json_encode($identifiant_compte);
-    trace("Identifiant connexion: $identifiant_compte_json");
-
-    // Précise les Options de connection
-
-    // CURLOPT_POST : la requête doit utiliser le protocole POST 
-    // pour sa résolution.
-    execute(curl_setopt($curl, 
-                        CURLOPT_POST, 
-                        true), 
-            'POST');
-
-    // CURLOPT_CUSTOMREQUEST : pour forcer le format 
-    // de la commande HTTP POST
-    //execute(curl_setopt($curl, 
-    //                    CURLOPT_CUSTOMREQUEST, 
-    //                    'POST'), 
-    //'CUSTOMREQUEST');
-
-    // CURLOPT_HTTPHEADER : tableau non associatif pour modifier 
-    // des paramètres du header envoyé par la requête.
-    execute(curl_setopt($curl,
-        CURLOPT_HTTPHEADER,
-        [
-            'Cache-Control: no-cache',
-            'accept: application/json, text/plain, */*',
-            'content-type: application/json',
-            'origin: https://cartoradio.fr',
-            'login:import_cartoradio@ballesta.fr',
-            'pwd://11031049'
-            ]),
-        'HEADER');
-
-
-    execute(
-        curl_setopt(
-            $curl,
-            CURLOPT_COOKIEJAR,
-            $ckfile),
-        'COOKIE');
-
-    // CURLOPT_RETURNTRANSFER : 
-    // si nous voulons ou non récupérer le contenu 
-    // de la requête appelée
-    execute(
-        curl_setopt(
-            $curl,
-            CURLOPT_RETURNTRANSFER,
-            true),
-        'RETURN');
-
-    $reponse_json = execute(curl_exec($curl), 'curl_exec');
-
-    echo "Réponse curl_exec: $reponse_json <br>";
-
-    return true;
-}
-*/
-// Importe le fichier dont le lien a été reçu par mail.
+// Importe le fichier 
+// dont le lien a été reçu par mail.
 function importe_fichier($lien_import_fichier_zip)
 {
-    Trace_import_departements::memorise_attribut('dp_erreurs',"lien_import_fichier_zip:$lien_import_fichier_zip");
+    Trace_import_departements::memorise_attribut('dp_erreurs', "lien_import_fichier_zip:$lien_import_fichier_zip");
     $downLoader = new curlDownloader($lien_import_fichier_zip);
     $taille_fichier = $downLoader->download();
     if ($taille_fichier > 0) {
         $zip_file_name = $downLoader->getFileName();
-        Trace_import_departements::memorise_attribut('dp_erreurs',"Downloaded $taille_fichier bytes to $zip_file_name");
+        Trace_import_departements::memorise_attribut('dp_erreurs', "Downloaded $taille_fichier bytes to $zip_file_name");
         // Voir si la taille du fichier est cohérente.
         // Si la taille est trop faible, c'est surement un message d'erreur.
         $taille = filesize($zip_file_name);
-        Trace_import_departements::memorise_attribut('dp_erreurs',"Taille fichier téléchargé: $taille");
+        Trace_import_departements::memorise_attribut('dp_erreurs', "Taille fichier téléchargé: $taille");
         if ($taille <= 1000) {
             // Trop petit pour un fichier de données.
             // Le lien est surement périmé.
             $reponse = file_get_contents($zip_file_name);
-            if (strpos($reponse,
-                    'Le fichier demandé n\'existe plus ou a déjà été téléchargé.<br>')
+            if (
+                strpos(
+                    $reponse,
+                    'Le fichier demandé n\'existe plus ou a déjà été téléchargé.<br>'
+                )
                 > 0
             ) {
-                Trace_import_departements::memorise_attribut('dp_erreurs','Le fichier a été dèja téléchargé');
+                Trace_import_departements::memorise_attribut('dp_erreurs', 'Le fichier a été dèja téléchargé');
                 $resultat_import = false;
-            }
-            else {
+            } else {
                 Trace_import_departements::memorise_attribut('dp_erreurs', 'Le fichier est trop petit mais aucune indication comme dèja téléchargé');
                 $resultat_import = false;
             }
-        }
-        else {
+        } else {
             // Taille supérieure à 1000.
             Importe_zip_dans_base($zip_file_name);
             Trace_import_departements::memorise_attribut('dp_nom_fichier_zip', $zip_file_name);
             $resultat_import = true;
         }
-    }
-    else {
+    } else {
         echo "Taille_fichier:$taille_fichier<br> pas d'importation!<br>";
         Trace_import_departements::memorise_attribut('dp_erreurs', "Pas de fichier téléchargé");
         $resultat_import = false;
@@ -312,8 +233,10 @@ function Importe_zip_dans_base($zip_file_name)
 {
     $dossier = "../../import_cartoradio";
     $dossier_decompression = "$dossier/temporaire";
-    decompresse($zip_file_name,
-                $dossier_decompression);
+    decompresse(
+        $zip_file_name,
+        $dossier_decompression
+    );
     // Les fichiers CSV sont disponibles, reste à les traiter et les importer dans la base
     importe_dans_base();
 }
@@ -328,8 +251,7 @@ function decompresse($fichier_zip, $dans_dossier)
         $zip->extractTo($dans_dossier);
         $zip->close();
         echo '---- ----OK<br>';
-    }
-    else {
+    } else {
         echo '---- ----*** erreur ***<br>';
     }
 }
@@ -340,20 +262,17 @@ function demande_export_prochain_departement()
     // Prochain département dont il faut demander l'export.
     $departement_a_importer = prochain_departement_a_exporter();
     //print_r($departement_a_importer); die();
-    if ($departement_a_importer !== null)
-    {
+    if ($departement_a_importer !== null) {
         echo "<hr>";
-        echo "Département: ", $departement_a_importer['dp_numero'], 
-             " id: ", $departement_a_importer['dp_id'];
+        echo "Département à importer: ", $departement_a_importer['dp_numero'],
+        " id: ", $departement_a_importer['dp_id'];
         echo "<br>";
         $dp_id = $departement_a_importer['dp_id'];
         $e = new Exporte_departements();
-        trace("Département à exporter: $dp_id")
+        trace("Département à exporter: $dp_id");
         $e->exporte_departement($dp_id);
         $e->enregistre_demande_export_departement($dp_id);
-    }
-    else
-    {
+    } else {
         echo "<h2>Fin de la demande d'Export des départements</h2>";
         // enchainer sur le transfert
         // de la base anfr
@@ -366,7 +285,7 @@ function prochain_departement_a_exporter()
 {
     echo "prochain_departement_a_importer<br>";
     $base = new Base_donnees('monsite4g_anfr');
-    echo 'dbName:' .$base->dbName, '<br>';
+    echo 'dbName:' . $base->dbName, '<br>';
     $sql = 'SELECT * 
             FROM departements
             WHERE dp_date_demande_export IS NULL 
@@ -438,7 +357,7 @@ function importe_departement_dans_base()
 					    VALUES";
     $nom_fichier_csv_antennes = "Antennes_Emetteurs_Bandes_Cartoradio.csv";
     importe_table($nom_fichier_csv_antennes, $sql_insert_into);
-    Trace_import_departements::memorise_attribut('dp_date_import', date("Y-m-d H:i:s") );
+    Trace_import_departements::memorise_attribut('dp_date_import', date("Y-m-d H:i:s"));
     return $departement;
 }
 
@@ -489,16 +408,14 @@ FIN;
 
     // Transforme de CSV en SQL
     echo "Transforme: $nom_fichier_csv en INSERT SQL par tranche de VALUES<br>";
-    transforme_csv_vers_inserts_sql
-    (                               //  Occurences: contenu
-                                    // ----------- --------------------------------------------------
+    transforme_csv_vers_inserts_sql(                               //  Occurences: contenu
+        // ----------- --------------------------------------------------
         $sql_debut,                 //           1:Paramètres de la requête
         $sql_insert_into,           //       *Lots:Début de l'INSERT à inclure en début de chaque lot
         $nom_fichier_csv,           // *Lot*lignes:Nom fichier CSV à transformer en VALUES
         $sql_fin                   //           1:Fin de la requête à inclure
-                                    // ----------- --------------------------------------------------
+        // ----------- --------------------------------------------------
     );
-
 }
 
 // Transcode le fichier exporté par le site de l'ANFR
@@ -545,8 +462,7 @@ function transforme_csv_vers_inserts_sql($sql_debut, $sql_insert_into, $nom_fich
 
     fwrite($fichier_sql, $sql_debut);
     $fin_csv = false;
-    while(!$fin_csv)
-    {
+    while (!$fin_csv) {
         // -- Début lot
         echo "<br>Importe lot numéro: $numero_lot <br>";
         // Colonnes dans lesquells les valeurs seront insérées
@@ -556,8 +472,7 @@ function transforme_csv_vers_inserts_sql($sql_debut, $sql_insert_into, $nom_fich
         // Pour chaque ligne d'une tranche (lot) à mettre dans un INSERT
         for ($i = 1; $i <= $nombre_values_dans_insert; $i++) {
             // Tentative de Lecture de la prochaine ligne
-            if ($csv->lis_ligne($ligne_csv))
-            {
+            if ($csv->lis_ligne($ligne_csv)) {
                 // Ligne csv lue
                 $numero_ligne_fichier_csv++;
                 // Saute la première ligne CSV qui contient le nom des champs
@@ -588,9 +503,7 @@ function transforme_csv_vers_inserts_sql($sql_debut, $sql_insert_into, $nom_fich
                 // Fin ligne CSV
                 //echo "SQL: " ,$valeurs_SQL, '<br>';
                 //if ($numero_ligne_fichier_csv >= 10) break;
-            }
-            else
-            {
+            } else {
                 // Fin du fichier CSV
                 $fin_csv = true; // Provoquera la sortie du 'While des lots'
                 break;           // Sortie du lot courant (avant le 'for')
@@ -602,7 +515,7 @@ function transforme_csv_vers_inserts_sql($sql_debut, $sql_insert_into, $nom_fich
         //echo "<br>Fin lot SQL: $valeurs_SQL <br>";
         fwrite($fichier_sql, $valeurs_SQL);
 
-        if ($numero_lot>=$nombre_maximum_lots_importes) break;
+        if ($numero_lot >= $nombre_maximum_lots_importes) break;
         $numero_lot++;
     }
     // Fin de la transformation = Fin des lots
@@ -672,7 +585,4 @@ function transfere_sas_dans_base($departement)
     echo "Vide l'import<br>";
     $r = $base->execute_sql("DELETE FROM monsite4g_anfr.antennes");
     $r = $base->execute_sql("DELETE FROM monsite4g_anfr.supports");
-
 }
-
-?>

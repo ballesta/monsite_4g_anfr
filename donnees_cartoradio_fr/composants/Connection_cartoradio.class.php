@@ -1,11 +1,14 @@
 <?php
 // Connexion au site "www.cartoradio.fr"
 // La connexion est mémorisée dans le navigateur (cookies).
-class Cartoradio
+
+// Factorisé en une seule classe
+// Connection rémanente à  Cartoradio.fr en début
+class Connection_cartoradio
 {
     public static
         $curl,          // Connecteur Curl
-        $ckfile,        // Create temp file to store cookies
+        $ckfile,        // Stocke le cookie de connection
         $id_connection; // Id renvoyé lors de la connection
 
     public static function connection()
