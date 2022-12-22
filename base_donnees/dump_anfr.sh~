@@ -1,2 +1,3 @@
-mysqldump -uroot -proot monsite4g_anfr >monsite4g_anfr.sql
+mysqldump -u bernard -p monsite4g_anfr >donnees/monsite4g_anfr.sql
+
 
