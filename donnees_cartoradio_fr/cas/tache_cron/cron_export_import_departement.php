@@ -8,7 +8,8 @@ Automatisation des export des données de cartoradio.fr
 L'export-import des données de l'ANFR est faite par départements à partir du site "www.cartoradio.fr"
 selon la procédure suivante:
 
-	1. la demande d'export est faite site "www.cartoradio.fr" en simulant une session d'un internaute (ce script)
+	1. la demande d'export est faite site "www.cartoradio.fr" en simulant une session
+       d'un internaute (ce script)
 	1.1 Connexion au compte "import_cartoradio@ballesta.fr" avec le mot de passe '//11031049'
 		=> fonction connexion_cartoradio()
 	1.2 Exporter la prochaine tranche de départements
@@ -45,15 +46,17 @@ Principe
 
 Détail du traitement
 ** Lire les mails de Cartoradio
-** Télécharger les fichiers à l'aide du lien contenu dans le message de mise à disposition des données
+** Télécharger les fichiers à l'aide du lien contenu dans le message
+ * de mise à disposition des données
 ** Décompresser l'archive *.zip
 ** Effacer les supports et antennes du département de la base
 ** Ajouter les données du département
 ** Demander l'export du prochain département qui sera traité à la prochaine exécution
 
-* Les tâches cron sont limitées à  30s de CPU; les traitement doivent donc ne pas dépasser cette durée sous peine
-  d'être interrompus brutalement.
-** En cas d'interruption brutale, le compte rendu d'exécutionde l'import du département ne sera pas enregistrée,
+* Les tâches cron sont limitées à  30s de CPU; les traitement doivent donc ne pas dépasser
+ * cette durée sous peine d'être interrompus brutalement.
+** En cas d'interruption brutale, le compte rendu d'exécution de l'import du département
+ * ne sera pas enregistrée,
  * ce qui donnera lieu à une tentative d'import ultérieure lors d'un passage du cron suivant.
 
 
