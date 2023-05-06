@@ -2,7 +2,8 @@ Historique
 
 12/02/2018 - BB - Extraction de l'import des données d'origine ANFR dans un projet séparé
 
-07/10/2018 - BB - Ajouté dédétection des antennes en cours d'installation;
+07/10/2018 - BB - Ajouté dédétection des antennes en cours d'installation
+                - Avec le super algorithme de Régis
 
 10/07/2022 - BB - Rechargé à partir du site
                 - Créé Dépot Git local
@@ -10,3 +11,6 @@ Historique
                 	- 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
                 - Enregistre dans GitHub    
 02/09/2022 - BB - Isolé Connection à Cartoradio dans classe
+
+06/05/2023 - BB - Importation en local (sans les limitation de temps dues au CRON)
+                - Sur nouvelle branche Local
