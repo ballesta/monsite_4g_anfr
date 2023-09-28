@@ -8,6 +8,8 @@ Etapes en local:
     - 10 départements
     - tous les départements
 
+Transférer en central ?:
+
 Localisation des sources de l'import:
     cd /home/bernard/monsite4g/monsite4g_anfr/donnees_cartoradio_fr/
 
