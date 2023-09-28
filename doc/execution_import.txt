@@ -1,0 +1,22 @@
+Import des données de l'ANFR en local
+=====================================
+
+septembre 2023: BB
+
+Etapes en local:
+    - une seul département: 78
+    - 10 départements
+    - tous les départements
+
+Localisation des sources de l'import:
+    cd /home/bernard/monsite4g/monsite4g_anfr/donnees_cartoradio_fr/
+
+
+Menu de test local par serveur web de php:
+
+    # Lancer le serveur d'import des données de l'ANFR
+        php -S localhost:8000
+    # Url Navigateur Firefox:
+        http://localhost:8000/cas/tache_cron/tests/cron_local.html
+
+
